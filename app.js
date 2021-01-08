@@ -1,8 +1,9 @@
 const express = require('express')
 const mongoose = require('mongoose')
-const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken');
 const cors = require('cors')
+const User = require('./models/user')
+const Userdetail = require('./models/userdetails')
 require('dotenv').config()
 
 // some config
@@ -47,7 +48,7 @@ app.use(cors())
 app.use(express.json())
 
 // db config
-const db_URI= process.env.DB
+const db_URI= process.env.DB 
 mongoose.connect(db_URI,()=>{
     console.log('db connected')
 })
@@ -97,5 +98,25 @@ app.post('/signup',async (req,res) => {
         res.status(400).json({ errors });
     }
 } )
-app.post('/login', )
-app.post('/login', )
+app.get('/logout', async (req,res) => {
+    res.cookie('jwt', '', { maxAge: 1 });
+    res.redirect('/');
+})
+app.post('/postuserdetails', async (req,res) => {
+    try {
+        const details = await Userdetail.create(req.body)
+        res.status(201).json(details)
+    } catch (error) {
+        res.status(404).json({error: error.message})
+        console.log(error)
+    }
+})
+app.get('/userdetailslist', async (req,res)=> {
+    try {
+        const details = await Userdetail.find()
+        res.json(details)
+    } catch (error) {
+        res.status(404).json({error: error.message})
+        console.log(error)
+    }
+})
